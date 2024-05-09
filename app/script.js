@@ -128,6 +128,5 @@ if(nacionalidad === 1 || nacionalidad === 2) {
         alert(`La reserva se efectuó a nombre de ${nombreCompleto} - DNI ${dni}\n\nUna vez realizado el pago, recibirá la entrada en su casilla de correo electrónico ${email}\n\nPresione "aceptar" para ser redirigido a la plataforma de pago.`);    
     }else {
         alert(`No se efectuó la reserva. Los datos ingresados no son válidos.`);    
-    }
-    
+    }    
 } 
