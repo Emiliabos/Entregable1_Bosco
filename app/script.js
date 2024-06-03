@@ -1,132 +1,202 @@
-let nacionalidad = Number(prompt(`Bienvenido al Parque Nacional Los Glaciares.\n\nPara comenzar la reserva de su entrada, ingrese una opción:\n\n1. Soy Argentino\n2. Soy Extranjero`));
-let menores, mayores, jubilados, menoresExtranjeros, mayoresExtranjeros;
-let confirmarCompra;
-let carrito = [];
-let usuario = [];
-
-const entrada = [
-    { id: 1, name: 'menores',  tipoEntrada: 'menores', precio: 3000 },
-    { id: 2, name: 'jubilados',tipoEntrada: 'jubilados', precio: 5000 },
-    { id: 3, name: 'mayores',tipoEntrada: 'mayores', precio: 10000 },
-    { id: 4, name: 'menores',tipoEntrada: 'menoresExtranjeros', precio: 12000 },
-    { id: 5, name: 'mayores',tipoEntrada: 'mayoresExtranjeros', precio: 30000 }
-];
-
-function agregarEntradas(tipo, cantidad) {
-    carrito.push({ tipoEntrada: tipo, cantidad: cantidad });
+function showCart(nacionalidad) {
+    const cart = document.getElementById('cart');
+    cart.style.display = 'block';
+    let spanNacionalidad = document.querySelector('#nacionalidad');
+    spanNacionalidad.textContent =  nacionalidad;
+    localStorage.setItem('nacionalidad', JSON.stringify(nacionalidad));
 }
-
-function modificarEntradas(posicion, cantidad) {
-    carrito[posicion].cantidad = cantidad;
-}
-
-function calcularTotal(carrito, entrada) {
-    let calculoTotal = 0;
-    for(let i = 0; i < carrito.length; i++) {
-        let itemCarrito = carrito[i];
-        for(let j = 0; j < entrada.length ;j++ ) {
-            if (entrada[j].tipoEntrada === itemCarrito.tipoEntrada) {
-                calculoTotal += itemCarrito.cantidad * entrada[j].precio;
-                break;
-            }
-        }
+function addItemsArg(){
+    let htmlToAdd = '';
+    for (let i = 0; i <= 2; i++) { 
+        const description = entrada[i].name;
+        const price = entrada[i].precio;
+        htmlToAdd += `<div class="cart__item">
+            <div class="cart__item-description">
+            ${description}
+            </div>
+            <div class="cart__item-quantity">
+                <button class="cart__quantity-btn btn-minus" type="button" name="button">
+                    <i class="fa-solid fa-minus"></i>
+                </button> 
+                <input type="text" name="name" value="0" disabled>
+                <button class="cart__quantity-btn btn-plus" type="button" name="button">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+            <div class="cart__item-price">$${price}</div>
+            <div class="cart__item-subtotal">$0</div>
+        </div>`;
     }
-    return calculoTotal;
+    const cartItems = document.querySelector('.cart__items');
+    cartItems.innerHTML = '';
+    cartItems.innerHTML += htmlToAdd;
 }
-
-function guardarDatosUsuarios(nombre, documento, correoElectronico) {
-    usuario.push({ nombre: nombre, documento: documento, correoElectronico: correoElectronico });
+function addItemsExt(){
+    let htmlToAdd = '';
+    for (let i = 3; i < entrada.length; i++) { 
+        const description = entrada[i].name;
+        const price = entrada[i].precio;
+        htmlToAdd += `<div class="cart__item">
+            <div class="cart__item-description">
+            ${description}
+            </div>
+            <div class="cart__item-quantity">
+                <button class="cart__quantity-btn btn-minus" type="button" name="button">
+                    <i class="fa-solid fa-minus"></i>
+                </button> 
+                <input type="text" name="name" value="0" disabled>
+                <button class="cart__quantity-btn btn-plus" type="button" name="button">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+            <div class="cart__item-price">$${price}</div>
+            <div class="cart__item-subtotal">$0</div>
+        </div>`;
+    }
+    const cartItems = document.querySelector('.cart__items');
+    cartItems.innerHTML = '';
+    cartItems.innerHTML += htmlToAdd;
 }
-
-switch(nacionalidad){
-    case 1:
-        alert(`Tarifas\n\n- Menores hasta 6 años: Gratis. \n- Menores de 7 a 15 años: $${entrada[0].precio}\n- Jubilados: $${entrada[1].precio}\n- Adultos desde 16 años: $${entrada[2].precio} `);
-        for (let i = 0; i <= 2; i++) {
-            let cantidad = parseInt(prompt(`Ingresa cantidad de ${entrada[i].name}\nEn caso de no querer entradas, ingrese 0.\nPrecio $${entrada[i].precio}.`));
-            if (!isNaN(cantidad)) {
-                agregarEntradas(entrada[i].tipoEntrada, cantidad);
-            } else {
-                alert(`No se efectuó la reserva. Los datos ingresados no son válidos.`);
-                break;
+function updatePrice() {
+    let quantityInput = document.querySelectorAll('.cart__item-quantity input');
+    let priceElement = document.querySelectorAll('.cart__item-price');
+    let subtotalElements = document.querySelectorAll('.cart__item-subtotal');
+    for (let i = 0; i < quantityInput.length; i++) {
+        const quantity = parseInt(quantityInput[i].value);
+        const priceUnit = parseInt(priceElement[i].textContent.replace('$', ''));
+        const subtotal = priceUnit * quantity;
+        subtotalElements[i].textContent = `$${subtotal}`;
+    }
+    let total = 0;
+    subtotalElements.forEach(subtotalElement => {
+        let subtotal = parseInt(subtotalElement.textContent.replace('$', ''));
+        total += subtotal;
+    });
+    let totalElement = document.querySelector('.cart__price span');
+    totalElement.textContent = `$${total}`;
+}
+function btnsQuantity() {
+    const btnMinus = document.querySelectorAll('.btn-minus');
+    const btnPlus = document.querySelectorAll('.btn-plus');
+    btnMinus.forEach(btnMinus => {
+        btnMinus.addEventListener('click', function() {
+            const inputField = this.parentNode.querySelector('input');
+            let value = parseInt(inputField.value);
+            if (value > 0) {
+                value--;
             }
+            inputField.value = value;
+            updatePrice();
+        });
+    });
+    btnPlus.forEach(btnPlus => {
+        btnPlus.addEventListener('click', function() {
+            const inputField = this.parentNode.querySelector('input');
+            let value = parseInt(inputField.value);
+            value++;
+            inputField.value = value;
+            updatePrice();
+        });
+    });
+}
+function addTickets () {
+    localStorage.removeItem('carrito'); 
+    let type = document.querySelectorAll('.cart__item-description');
+    let quantityType = document.querySelectorAll('.cart__item-quantity input');
+    let priceType = document.querySelectorAll('.cart__item-subtotal');
+    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        for (let i = 0; i < type.length; i++) {
+            carrito.push({ type: type[i].innerText, quantityType: quantityType[i].value, priceType: priceType[i].innerText });
         }
-        confirmarCompra = confirm(`Entradas agregadas al carrito:\nMenores = ${carrito[0].cantidad}\nJubilados = ${carrito[1].cantidad}\nAdultos = ${carrito[2].cantidad}\n\nPresione "aceptar" para confirmar la compra o "cancelar" si desea realizar algún cambio.`);
-        if(!confirmarCompra) {
-            let entradas = Number(prompt(`¿Qué entrada desea modificar? Ingrese el número correspondiente\n1.Cambiar entrada menores\n2.Cambiar entrada jubilados\n3.Cambiar entrada adultos`));
-            switch(entradas){
-                case 1:
-                    cantidad = parseInt(prompt(`Ingresa cantidad de menores\nPrecio $${entrada[0].precio}`));
-                    modificarEntradas(0, cantidad);
-                    alert(`Entradas agregadas al carrito:\nMenores = ${carrito[0].cantidad}\nJubilados = ${carrito[1].cantidad}\nAdultos = ${carrito[2].cantidad}`);
-                    break;
-                case 2:
-                    cantidad = parseInt(prompt(`Ingresa cantidad de jubilados\nPrecio $${entrada[1].precio}`));
-                    modificarEntradas(1, cantidad);
-                    alert(`Entradas agregadas al carrito:\nMenores = ${carrito[0].cantidad}\nJubilados = ${carrito[1].cantidad}\nAdultos = ${carrito[2].cantidad}`);
-                    break;
-                case 3:
-                    cantidad = parseInt(prompt(`Ingresa cantidad de adultos\nPrecio $${entrada[2].precio}`));
-                    modificarEntradas(2, cantidad);
-                    alert(`Entradas agregadas al carrito:\nMenores = ${carrito[0].cantidad}\nJubilados = ${carrito[1].cantidad}\nAdultos = ${carrito[2].cantidad}`);
-                    break;   
-                default:
-                    alert(`No ha realizado cambios`);
-                    break;
-            }
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+}
+function showForm() {
+    const cardInfo = document.getElementById('info');
+    const quantityInputs = document.querySelectorAll('.cart__item-quantity input');
+    let ticketsCart = false;
+    quantityInputs.forEach(input => {
+        if(parseInt(input.value) !== 0){
+            ticketsCart = true;
+            return;
+        } 
+    });
+    if (ticketsCart) {
+        cardInfo.style.display = 'block';
+    } else {
+        alert('No agregó ninguna entrada a su pedido.');
+    }
+}
+function checkEmail() {
+    const emailInput = document.getElementById("email");
+    if (!emailInput.checkValidity()) {
+        alert('Formato de email no permitido. Debe ingresar un correo válido.');
+        return false; 
+    } 
+    return true;
+}
+function showPrice() {
+    const showPrice = document.getElementById('price');
+    let totalElement = document.querySelector('.cart__price span');
+    let total = parseInt(totalElement.textContent.replace('$', ''));
+    showPrice.textContent = `$${total}`;
+}
+function showModal () {
+    const modal = document.getElementById('modal');
+    modal.style.display = 'block';
+}
+function hideModal () {
+    const modal = document.getElementById('modal');
+    modal.style.display = 'none';
+}
+function saveInfoUser() {
+    console.log(localStorage.getItem('usuario')); 
+    const fullname = document.getElementById('fullname').value;
+    const dni = document.getElementById('dni').value;
+    const email = document.getElementById('email').value;
+    if( fullname !== "" && dni !== "" && email !== "") {
+        if(checkEmail()) {
+            usuario.push({fullname:fullname, dni: dni, email: email });
+            localStorage.setItem('usuario', JSON.stringify(usuario));
+            showPrice();
+            showModal();
         }
-        break;
-    case 2:
-        alert(`Tarifas\n\n- Menores hasta 6 años: Gratis. \n- Menores de 7 a 15 años: $${entrada[3].precio}\n- Adultos desde 16 años: $${entrada[4].precio} `);
-        for (let i = 3; i < entrada.length; i++) {
-            let cantidad = parseInt(prompt(`Ingresa cantidad de ${entrada[i].name}\nEn caso de no querer entradas, ingrese 0.\nPrecio $${entrada[i].precio}.`));
-            if (!isNaN(cantidad)) {
-                agregarEntradas(entrada[i].tipoEntrada, cantidad);
-            } else {
-                alert(`No se efectuó la reserva. Los datos ingresados no son válidos.`);
-                break;
-            }
-        }
-        confirmarCompra = confirm(`Entradas agregadas al carrito:\nMenores = ${carrito[0].cantidad}\nAdultos = ${carrito[1].cantidad}\n\nPresione "aceptar" para confirmar la compra o "cancelar" si desea realizar algún cambio.`);
-        if(!confirmarCompra) {
-            console.log(carrito);
-            let entradas = Number(prompt(`¿Qué entrada desea modificar? Ingrese el número correspondiente\n1. Cambiar entrada menores\n2. Cambiar entrada adultos`));
-            switch(entradas){
-                case 1:
-                    cantidad = parseInt(prompt(`Ingresa cantidad de menores\nPrecio $${entrada[3].precio} `));
-                    modificarEntradas(0, cantidad);
-                    alert(`Entradas agregadas al carrito:\nMenores = ${carrito[0].cantidad}\nAdultos = ${carrito[1].cantidad}`);
-                    break;
-                case 2:
-                    cantidad = parseInt(prompt(`Ingresa cantidad de adultos\nPrecio $${entrada[4].precio}`));
-                    modificarEntradas(1, cantidad);
-                    alert(`Entradas agregadas al carrito:\nMenores = ${carrito[0].cantidad}\nAdultos = ${carrito[1].cantidad}`);
-                    break;   
-                default:
-                    alert(`No ha realizado cambios`);
-                    break;
-            } 
-        }
-        break;
-    default:
-        alert(`Dato inválido. No ha seleccionado su nacionalidad.`);
-        break;
-} 
-console.log(carrito);
-
-if(nacionalidad === 1 || nacionalidad === 2) {
-    //Total a Pagar
-    let total = calcularTotal(carrito, entrada);
-    alert(`El total a abonar es de $${total}\n\nPresione "aceptar" para confirmar la compra.`);
-
-    //Datos para efectuar la compra
-    const nombreCompleto = prompt(`Ingrese su nombre completo`);
-    const dni = Number(prompt(`Ingrese su DNI (solo números)`));
-    const email = prompt(`Ingrese su correo electrónico (formato email@email.com)`);
-    guardarDatosUsuarios(nombreCompleto, dni, email);
-    console.log(usuario);
-    if(nombreCompleto != "" && dni != "" && email != "") {
-        alert(`La reserva se efectuó a nombre de ${nombreCompleto} - DNI ${dni}\n\nUna vez realizado el pago, recibirá la entrada en su casilla de correo electrónico ${email}\n\nPresione "aceptar" para ser redirigido a la plataforma de pago.`);    
     }else {
-        alert(`No se efectuó la reserva. Los datos ingresados no son válidos.`);    
-    }    
-} 
+        alert('Debe ingresar todos sus datos para poder efectuar la compra.');
+    }
+}
+function clearStorage() {
+    carrito.splice(0, carrito.length);
+    usuario.splice(0, usuario.length);
+    localStorage.clear();
+    document.getElementById('fullname').value = '';
+    document.getElementById('dni').value = '';
+    document.getElementById('email').value = '';
+}
+function reloadSite() {
+    window.scrollTo(0, 0);
+    location.reload();
+}
+document.getElementById('btnArg').addEventListener('click', function() {
+    showCart("Argentinos"); 
+    addItemsArg();  
+    btnsQuantity();    
+});
+document.getElementById('btnExt').addEventListener('click', function() {
+    showCart("Extranjeros");
+    addItemsExt();
+    btnsQuantity();
+});
+document.getElementById('confirm').addEventListener('click', function() {
+    addTickets();
+    showForm();
+});
+document.getElementById('payment').addEventListener('click', function() {
+    saveInfoUser();
+});
+document.getElementById('close').addEventListener('click', function() {
+    hideModal();
+});
+document.getElementById('endOrder').addEventListener('click', function() {
+    clearStorage();
+    reloadSite();
+});
