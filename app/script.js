@@ -149,7 +149,6 @@ function hideModal () {
     modal.style.display = 'none';
 }
 function saveInfoUser() {
-    console.log(localStorage.getItem('usuario')); 
     const fullname = document.getElementById('fullname').value;
     const dni = document.getElementById('dni').value;
     const email = document.getElementById('email').value;
